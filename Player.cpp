@@ -1,5 +1,9 @@
 #include "Player.h"
-   
+#include "Util.h"
+
+Player::Player() {}
+Player::Player(std::string name) : name(name), score(0) {}
+
 void Player::replaceTile(Tile* tile, Tile* replacement) {
     int index = -1;
     for(int i = 0; i < hand.size(); ++i) {
@@ -7,7 +11,7 @@ void Player::replaceTile(Tile* tile, Tile* replacement) {
             index = i;
     }
     hand.remove(index);
-    hand.insert(index, replacement);   
+    hand.insert(index, replacement);
 }
 
 Tile* Player::getTile(std::string tileCode) {
@@ -16,7 +20,7 @@ Tile* Player::getTile(std::string tileCode) {
     for(int i = 0; i < hand.size(); ++i) {
         Tile* tile = hand.at(i);
         
-        if(tile->colour == tileCode[0] && tile->shape == tileCode[1])
+        if(tile->colour == tileCode[0] && tile->shape == charToInt(tileCode[1]))
             retTile = tile;
     }
     return retTile;
@@ -42,3 +46,6 @@ std::string Player::getName() const {
     return name;
 }
 
+bool operator==(const Player& p1, const Player& p2) {
+   return p1.getName() == p2.getName();
+}

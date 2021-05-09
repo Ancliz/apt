@@ -11,6 +11,9 @@ public:
    LinkedList();
    ~LinkedList();
 
+   // Debug testing
+   LinkedList(std::initializer_list<Node> l);
+
    // Return number of elements
    int size() const;
    
@@ -50,5 +53,7 @@ private:
    // Call for request of indices that are illegal
    void out_of_bounds(int index);
 };
+
+std::ostream& operator<<(std::ostream &out, const LinkedList& list);
 
 #endif // ASSIGN2_LINKEDLIST_H

@@ -2,13 +2,15 @@
 #ifndef ASSIGN2_PLAYER_H
 #define ASSIGN2_PLAYER_H
 
-#include <Tile.h>
-#include <LinkedList.h>
 #include <string>
+#include "Tile.h"
+#include "LinkedList.h"
 
 class Player {
    public:
-      
+      Player();
+      Player(std::string name);
+
       // Update the player's score
       void updateScore(int x);
 
@@ -40,5 +42,8 @@ class Player {
       // PLayer score
       int score;
 };
+
+bool operator==(const Player& player1, const Player& player2);
+std::ostream& operator<<(std::ostream &out, const Player& player);
 
 #endif // ASSIGN2_PLAYER_H

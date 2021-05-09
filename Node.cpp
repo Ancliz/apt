@@ -12,6 +12,9 @@ Node::Node(Node& other) {
 }
 
 Node::~Node() {
-   if(tile != nullptr)
+   if(tile != nullptr) {
       delete tile;
+      tile = nullptr;
+      next = nullptr;
+   }
 }

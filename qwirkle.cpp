@@ -1,15 +1,13 @@
 
-#include "LinkedList.h"
+#include "GameEngine.h"
 
 #include <iostream>
 
 #define EXIT_SUCCESS    0
 
 int main(void) {
-   LinkedList* list = new LinkedList();
-   delete list;
-
-   std::cout << "TODO: Implement Qwirkle!" << std::endl;
+   GameEngine engine = GameEngine();
+   engine.start();
 
    return EXIT_SUCCESS;
 }

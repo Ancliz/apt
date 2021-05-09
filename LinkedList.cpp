@@ -3,6 +3,11 @@
 #include <string>
 #include "LinkedList.h"
 
+// For testing
+LinkedList::LinkedList(std::initializer_list<Node> l) {
+
+}
+
 LinkedList::LinkedList() {
    head = nullptr;
    length = 0;
@@ -65,7 +70,10 @@ void LinkedList::insert(int index, Tile* data) {
    else if(index == 0)
       push_front(data);
 
-   else if(index == length-1)
+   // length, and not length - 1, because it is assumed insert() is called  after remove()
+   // and length has been decremented, and therefore they do not wish to insert at the end,
+   // but rather the second last element
+   else if(index == length)
       push_back(data);
 
    else {
@@ -113,7 +121,7 @@ Tile* LinkedList::pop_front() {
    Node* toDelete = head;
    head = head->next;
 
-   retTile = toDelete->tile;
+   retTile = new Tile(*toDelete->tile);
 
    delete toDelete;
 
@@ -147,9 +155,8 @@ Tile* LinkedList::pop_back() {
 }
 
 void LinkedList::clear() {
-   while(head != nullptr) {
-      pop_front();
-   }
+   while(length > 0)
+      remove(0);
 }
 
 void LinkedList::out_of_bounds(int index) {

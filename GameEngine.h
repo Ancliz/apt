@@ -15,19 +15,24 @@
 #define SAVE         "save"
 #define AT            "at"
 #define NO_ERROR       ""
+
+
 class GameEngine {
 public:
+    GameEngine();
+    ~GameEngine();
     void start();
 
 private:
     std::string errorMessage;
-    typedef struct Tokens_t
-    {
-        std::string command;
-        std::string tileCode;
-        std::string boardLoc;
-        std::string saveFile;
-    };
+
+    typedef struct
+        {
+            std::string command;
+            std::string tileCode;
+            std::string boardLoc;
+            std::string saveFile;
+        } Tokens_t;
 
     Player* currentPlayer;
     Player player1;

@@ -2,9 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "Overloads.h"
 #include "GameEngine.h"
 #include "TileCodes.h"
+#include "Util.h"
 
 GameEngine::~GameEngine() {
     // No deleting as nothing is allocated on the heap.
@@ -16,9 +16,34 @@ GameEngine::GameEngine() {
     tileBag = LinkedList();
     board = Board();
 
-    player1 = Player();
-    player2 = Player();
+    player1 = Player("Alasdair");
+    Tile* tiles[] =
+    {
+        new Tile(Colour('R'), Shape(1)),
+        new Tile(Colour('O'), Shape(4)),
+        new Tile(Colour('P'), Shape(1)),
+        new Tile(Colour('B'), Shape(2))
+    };
+
+    for(int i = 0; i < 4; ++i) {
+        player1.getHand().push_back(tiles[i]);
+    }
+
+    Tile* tilebagT[] =
+    {
+        new Tile(Colour('B'), Shape(1)),
+        new Tile(Colour('R'), Shape(4)),
+        new Tile(Colour('Y'), Shape(1)),
+        new Tile(Colour('P'), Shape(2))
+    };
+
+    for(int i = 0; i < 4; ++i) {
+       tileBag.push_back(tilebagT[i]);
+    }
+    
+    player2 = Player("Abu");
     currentPlayer = &player1;
+
 }
 
 
@@ -56,7 +81,7 @@ void GameEngine::start() {
                 errorMessage = "Please enter a valid command!";
             checkError();
         }
-        currentPlayer = currentPlayer == player1 ? player2 : player1;
+        currentPlayer = *currentPlayer == player1 ? &player2 : &player1;
         
         if(gameIsOver())
             quit = true;
@@ -66,13 +91,15 @@ void GameEngine::start() {
 
 
 bool GameEngine::executeCommand() {
-
+    bool valid = false;
     if(PLACE == tokens.command) {
         Tile* tile = currentPlayer->getTile(tokens.tileCode);
 
         if(nullptr != tile) {
-            if(board.legalPlacementAt(tokens.boardLoc, tile))
+            if(board.legalPlacementAt(tokens.boardLoc, tile)) {
                 board.addToBoard(tile);
+                valid = true;
+            }
             else errorMessage = "You cannot place a tile here!";
         } else errorMessage = "You do not have that tile!";
     }
@@ -82,14 +109,18 @@ bool GameEngine::executeCommand() {
         Tile* replacement = tileBag.pop_front();
 
         if(nullptr != playerTile) {
-            if(nullptr != replacement)
+            if(nullptr != replacement) {
                 currentPlayer->replaceTile(playerTile, replacement);
+                valid = false;
+            }
             else errorMessage = "There are no more tiles in the bag!";
         } else errorMessage = "You do not have that tile!";
     }
     else if(tokens.command == SAVE) {
         save();
+        valid = true;
     }
+    return valid;
 }
 
 
@@ -100,9 +131,8 @@ bool GameEngine::parseInput(std::string input) {
 
     for(int i = 0; i < MAX_ARGS && inputStream >> tokens[i]; ++i);
 
-    if(tokens[0] == PLACE) {
+    if(PLACE == tokens[0]) {
         this->tokens.command = PLACE;
-
         if(validTile(tokens[1])) {
 
             if(tokens[2] == AT && validLoc(tokens[3])) {
@@ -112,23 +142,31 @@ bool GameEngine::parseInput(std::string input) {
         }
     }
 
-    else if(tokens[0] == REPLACE) {
-        if(validTile(tokens[1]))
+    else if(REPLACE == tokens[0]) {
+        this->tokens.command = REPLACE;
+        if(validTile(tokens[1])) {
             this->tokens.tileCode = tokens[1];
+            valid = true;
+        }
     }
     
-    else if(tokens[0] == SAVE) {
+    else if(SAVE == tokens[0]) {
+        this->tokens.command = SAVE;
         this->tokens.saveFile = tokens[1];
+        valid = true;
     }
+    return valid;
 }
 
 bool GameEngine::validTile(std::string tileCode) {
-    bool valid = true;
+    bool valid = false;
     const char* tile = tileCode.c_str();
 
     if(tileCode.length() == 2) {
-        if(validColour(tile[0]) && validShape(tile[1] - '0'))
+        if(validColour(tile[0]) && validShape(charToInt(tile[1]))) {
             tokens.tileCode = tileCode;
+            valid = true;
+        }
     }
     return valid;
 }
@@ -137,14 +175,15 @@ bool GameEngine::validLoc(std::string location) {
     bool validRow = false;
     bool validCol = false;
 
-    const char* loc = location.c_str();
+    if(location.length() == 2) {
+        const char* loc = location.c_str();
 
-    if(loc[0] > 'A' && loc[0] < board.getMaxRow())
-        validRow = true;
+        if(loc[0] >= 'A' && loc[0] <= board.getHeight())
+            validRow = true;
 
-    if(loc[1] > 0 && loc[1] < board.getMaxCol())
-        validCol = true;
-
+        if(charToInt(loc[1]) > 0 && charToInt(loc[1]) < board.getWidth())
+            validCol = true;
+    }
     return validRow && validCol;
 }
 
@@ -177,13 +216,17 @@ bool GameEngine::validShape(int shape) {
 }
 
 bool GameEngine::save() {
+    bool success = false;
     std::ofstream outputFile("./" + tokens.saveFile + ".save");
-
+    
     if(outputFile.good()) {
         outputFile << player1; 
         outputFile << player2;
 //        outputFile << board;    // TODO
         outputFile << tileBag;
         outputFile << currentPlayer->getName();
+        success = true;
     }
+    return success;
+    
 }
